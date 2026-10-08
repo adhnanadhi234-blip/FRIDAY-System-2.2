@@ -1,0 +1,6 @@
+{
+  "name": "FRIDAY SYSTEM",
+  "description": "A futuristic sci-fi personal AI computer interface and holographic HUD system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
