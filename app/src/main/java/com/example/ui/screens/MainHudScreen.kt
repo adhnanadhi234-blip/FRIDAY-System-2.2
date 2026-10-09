@@ -73,6 +73,7 @@ import com.example.ui.components.FridayHudPanel
 import com.example.ui.components.HudSteppedProgressBar
 import com.example.ui.components.HudTelemetryRow
 import com.example.ui.components.ScanlineAndGridBackground
+import com.example.ui.components.ScannerOverlay
 import com.example.ui.screens.subsystems.AiTerminalPanel
 import com.example.ui.screens.subsystems.BlackBoardPanel
 import com.example.ui.screens.subsystems.ClockReminderPanel
@@ -611,74 +612,36 @@ private fun CenterHolographicHub(
     intensity: AnimationIntensity
 ) {
     val hudColors = LocalFridayColors.current
-    val infiniteTransition = rememberInfiniteTransition(label = "hud_rot")
-
-    val radarAngle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(if (intensity == AnimationIntensity.HIGH) 4000 else 7000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "radar_rot"
-    )
 
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Holographic Telemetry Rings Canvas
+        // Holographic Telemetry Rings & Glowing Geometric Scanner
         Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val center = Offset(size.width / 2f, size.height / 2f)
-                val maxRadius = minOf(size.width, size.height) * 0.45f
-
-                // Outer telemetry ring
-                drawCircle(
-                    color = hudColors.primary.copy(alpha = 0.25f),
-                    radius = maxRadius,
-                    center = center,
-                    style = Stroke(width = 1.5.dp.toPx())
-                )
-
-                // Middle dashed ring
-                drawCircle(
-                    color = hudColors.border.copy(alpha = 0.2f),
-                    radius = maxRadius * 0.75f,
-                    center = center,
-                    style = Stroke(width = 1.dp.toPx())
-                )
-
-                // Inner core ring
-                drawCircle(
-                    color = hudColors.accent.copy(alpha = 0.35f),
-                    radius = maxRadius * 0.45f,
-                    center = center,
-                    style = Stroke(width = 1.5.dp.toPx())
-                )
-
-                // Rotating radar sweep line (subtle scan effect)
-                if (intensity != AnimationIntensity.LOW) {
-                    val rad = Math.toRadians(radarAngle.toDouble())
-                    val endX = center.x + (maxRadius * Math.cos(rad)).toFloat()
-                    val endY = center.y + (maxRadius * Math.sin(rad)).toFloat()
-                    drawLine(
-                        color = hudColors.primary.copy(alpha = 0.5f),
-                        start = center,
-                        end = Offset(endX, endY),
-                        strokeWidth = 1.5.dp.toPx()
-                    )
-                }
-            }
+            ScannerOverlay(
+                modifier = Modifier.fillMaxSize(),
+                intensity = intensity,
+                showTargetReticles = true,
+                showSweepingBeam = true,
+                showHexagonGrid = true
+            )
 
             // Central Sci-Fi Identity & Clock
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(hudColors.panelBg.copy(alpha = 0.65f))
+                    .border(1.dp, hudColors.border.copy(alpha = 0.3f), RoundedCornerShape(4.dp))
+                    .padding(horizontal = 14.dp, vertical = 6.dp)
+            ) {
                 Text(
                     text = "FRIDAY CORE",
                     color = hudColors.primary,
